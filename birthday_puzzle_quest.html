@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday, My Love ✨</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blush: {
+              50: '#fff5f7',
+              100: '#ffe4e9',
+              200: '#fecdce',
+              300: '#fbaab3',
+              400: '#f8778f',
+              500: '#ef446a',
+              600: '#dc2650',
+            },
+            cream: '#fdfbf7',
+            rosegold: '#d48b7b',
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+            script: ['"Dancing Script"', 'cursive'],
+            serif: ['"Playfair Display"', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Background romantic subtle gradient & floating elements */
+    body {
+      background: radial-gradient(circle at 20% 20%, #fff0f3 0%, #fae1e6 50%, #f7d6dc 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Floating particles background */
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart-bubble {
+      position: absolute;
+      bottom: -40px;
+      animation: floatUp 14s linear infinite;
+      opacity: 0.35;
+      filter: drop-shadow(0 2px 4px rgba(239, 68, 106, 0.2));
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.8);
+        opacity: 0;
+      }
+      15% { opacity: 0.45; }
+      85% { opacity: 0.45; }
+      100% {
+        transform: translateY(-115vh) rotate(360deg) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    /* Flip Card 3D effects for Step 2 */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Custom Glassmorphism card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 20px 40px -15px rgba(220, 38, 80, 0.12),
+                  0 0 0 1px rgba(254, 205, 206, 0.3);
+    }
+
+    /* Glowing Key Animation */
+    @keyframes pulseGlow {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 12px rgba(239, 68, 106, 0.6));
+      }
+      50% {
+        transform: scale(1.06);
+        filter: drop-shadow(0 0 24px rgba(239, 68, 106, 0.9));
+      }
+    }
+    .animate-glow {
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    /* Gentle bounce for hints & interactive triggers */
+    @keyframes gentleWiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+    .hover-wiggle:hover {
+      animation: gentleWiggle 0.4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="text-slate-700 flex flex-col justify-between relative selection:bg-blush-200 selection:text-blush-600">
+
+  <!-- Ambient Floating Heart Background Particles -->
+  <div class="floating-hearts" id="heartsContainer"></div>
+
+  <!-- Audio Tone Synthesis & Sound Controls -->
+  <header class="relative z-10 w-full max-w-2xl mx-auto px-4 pt-6 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <span class="text-2xl animate-bounce">💌</span>
+      <div>
+        <h1 class="font-script text-2xl md:text-3xl font-bold text-blush-600 tracking-wide">A Sweet Quest for You</h1>
+        <p class="text-xs text-slate-500 font-semibold tracking-wider uppercase">Your Birthday Mystery</p>
+      </div>
+    </div>
+    
+    <!-- Sound Toggle Button -->
+    <button id="soundToggle" onclick="toggleAudio()" class="flex items-center space-x-2 bg-white/80 hover:bg-white text-blush-500 text-xs font-bold py-2 px-3.5 rounded-full shadow-sm border border-blush-100 transition active:scale-95">
+      <span id="soundIcon">🔔</span>
+      <span id="soundLabel">Music: ON</span>
+    </button>
+  </header>
+
+  <!-- Progress Stepper Tracker -->
+  <main class="relative z-10 w-full max-w-xl mx-auto px-4 py-4 my-auto">
+    <nav class="mb-6 bg-white/70 backdrop-blur-md rounded-2xl p-3 shadow-sm border border-blush-100" aria-label="Progress">
+      <div class="flex items-center justify-between relative">
+        <!-- Connecting Track Line -->
+        <div class="absolute top-1/2 left-6 right-6 -translate-y-1/2 h-1 bg-blush-100 -z-0"></div>
+        <div id="progressBar" class="absolute top-1/2 left-6 -translate-y-1/2 h-1 bg-blush-400 -z-0 transition-all duration-500" style="width: 0%;"></div>
+
+        <!-- Step 1 Indicator -->
+        <div class="step-node relative z-10 flex flex-col items-center cursor-pointer" onclick="goToStep(1)">
+          <div id="node-1" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-blush-500 text-white shadow-md transition-all duration-300">
+            1
+          </div>
+          <span class="text-[11px] font-bold mt-1 text-blush-600">Word</span>
+        </div>
+
+        <!-- Step 2 Indicator -->
+        <div class="step-node relative z-10 flex flex-col items-center">
+          <div id="node-2" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-white text-slate-400 border border-blush-100 shadow-sm transition-all duration-300">
+            2
+          </div>
+          <span class="text-[11px] font-bold mt-1 text-slate-400">Match</span>
+        </div>
+
+        <!-- Step 3 Indicator -->
+        <div class="step-node relative z-10 flex flex-col items-center">
+          <div id="node-3" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-white text-slate-400 border border-blush-100 shadow-sm transition-all duration-300">
+            3
+          </div>
+          <span class="text-[11px] font-bold mt-1 text-slate-400">Code</span>
+        </div>
+
+        <!-- Step 4 Indicator -->
+        <div class="step-node relative z-10 flex flex-col items-center">
+          <div id="node-4" class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-white text-slate-400 border border-blush-100 shadow-sm transition-all duration-300">
+            4
+          </div>
+          <span class="text-[11px] font-bold mt-1 text-slate-400">Gift</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Container Card -->
+    <div class="glass-card rounded-3xl p-6 md:p-8 min-h-[460px] flex flex-col justify-between transition-all duration-300">
+      
+      <!-- ================= STEP 1: WORD SCRAMBLE ================= -->
+      <section id="step1" class="space-y-6">
+        <div class="text-center">
+          <span class="inline-block px-3 py-1 bg-blush-100 text-blush-600 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Stage 1 of 4</span>
+          <h2 class="text-2xl font-bold font-serif text-slate-800">Unscramble My Favorite Word</h2>
+          <p class="text-sm text-slate-500 mt-1">What you bring into my world every single morning:</p>
+        </div>
+
+        <!-- Scrambled Letter Tiles -->
+        <div class="flex justify-center items-center gap-2 flex-wrap py-2">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform -rotate-3">S</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform rotate-6">U</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform -rotate-6">N</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform rotate-3">S</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform -rotate-2">H</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform rotate-6">I</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform -rotate-3">N</div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blush-50 border-2 border-blush-200 flex items-center justify-center font-extrabold text-xl md:text-2xl text-blush-600 shadow-sm transform rotate-2">E</div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="space-y-3">
+          <div class="relative max-w-xs mx-auto">
+            <input type="text" id="wordInput" autocomplete="off" placeholder="Type here..." 
+                   class="w-full text-center text-xl font-bold tracking-widest uppercase py-3 px-4 rounded-2xl border-2 border-blush-200 focus:border-blush-500 focus:outline-none bg-white/90 shadow-inner text-blush-600 placeholder-blush-200"
+                   onkeydown="if(event.key==='Enter') checkWordAnswer()">
+          </div>
+
+          <div id="wordFeedback" class="text-center text-sm font-semibold h-5 transition-all text-blush-500"></div>
+
+          <!-- Buttons: Hint & Submit -->
+          <div class="flex justify-center gap-3 pt-2">
+            <button onclick="revealWordHint()" class="px-4 py-2.5 rounded-xl border border-blush-300 text-blush-500 text-sm font-bold hover:bg-blush-50 active:scale-95 transition">
+              💡 Need a hint?
+            </button>
+            <button onclick="checkWordAnswer()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blush-500 to-blush-600 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition">
+              Unlock Step 2 →
+            </button>
+          </div>
+
+          <p id="hintText" class="text-xs text-center text-slate-400 italic hidden pt-1">
+            Hint: "You are my ______ ☀️, my only ______..." (8 letters)
+          </p>
+        </div>
+      </section>
+
+      <!-- ================= STEP 2: PAIR MATCHING ================= -->
+      <section id="step2" class="space-y-5 hidden">
+        <div class="text-center">
+          <span class="inline-block px-3 py-1 bg-blush-100 text-blush-600 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Stage 2 of 4</span>
+          <h2 class="text-2xl font-bold font-serif text-slate-800">Match Our Sweet Tokens</h2>
+          <p class="text-sm text-slate-500 mt-0.5">Find 3 pairs of little symbols of our love to proceed!</p>
+        </div>
+
+        <!-- 3x2 Grid for 6 cards -->
+        <div id="memoryGrid" class="grid grid-cols-3 gap-3.5 max-w-xs mx-auto py-2">
+          <!-- Dynamically populated by JS -->
+        </div>
+
+        <div class="text-center">
+          <p id="memoryStatus" class="text-sm font-semibold text-blush-600 h-6">Matches: 0 / 3</p>
+        </div>
+      </section>
+
+      <!-- ================= STEP 3: SAFE COMBINATION LOCK ================= -->
+      <section id="step3" class="space-y-6 hidden">
+        <div class="text-center">
+          <span class="inline-block px-3 py-1 bg-blush-100 text-blush-600 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Stage 3 of 4</span>
+          <h2 class="text-2xl font-bold font-serif text-slate-800">The Secret 3-Digit Code</h2>
+          <p class="text-sm text-slate-500 mt-0.5">Decode the combination to open the heart vault:</p>
+        </div>
+
+        <!-- Clues List -->
+        <div class="bg-blush-50/70 border border-blush-100 rounded-2xl p-4 text-xs md:text-sm space-y-2 text-slate-600">
+          <p class="flex items-start gap-2">
+            <span class="font-extrabold text-blush-500">Digit 1:</span>
+            <span>Number of hearts beating together as one 💖 (Single digit: <strong>1</strong>)</span>
+          </p>
+          <p class="flex items-start gap-2">
+            <span class="font-extrabold text-blush-500">Digit 2:</span>
+            <span>Letters in the sweetest four-letter word: <strong>LOVE</strong> (Digit: <strong>4</strong>)</span>
+          </p>
+          <p class="flex items-start gap-2">
+            <span class="font-extrabold text-blush-500">Digit 3:</span>
+            <span>Words in our eternal promise: <em>"I Love You"</em> (Digit: <strong>3</strong>)</span>
+          </p>
+        </div>
+
+        <!-- 3 Digit Dials -->
+        <div class="flex justify-center items-center gap-4 py-1">
+          <!-- Dial 1 -->
+          <div class="flex flex-col items-center">
+            <button onclick="changeDigit(0, 1)" class="w-10 h-8 rounded-t-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▲</button>
+            <div id="digit-0" class="w-14 h-16 bg-white border-y-2 border-blush-300 font-extrabold text-3xl text-blush-600 flex items-center justify-center shadow-inner">0</div>
+            <button onclick="changeDigit(0, -1)" class="w-10 h-8 rounded-b-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▼</button>
+          </div>
+
+          <!-- Dial 2 -->
+          <div class="flex flex-col items-center">
+            <button onclick="changeDigit(1, 1)" class="w-10 h-8 rounded-t-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▲</button>
+            <div id="digit-1" class="w-14 h-16 bg-white border-y-2 border-blush-300 font-extrabold text-3xl text-blush-600 flex items-center justify-center shadow-inner">0</div>
+            <button onclick="changeDigit(1, -1)" class="w-10 h-8 rounded-b-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▼</button>
+          </div>
+
+          <!-- Dial 3 -->
+          <div class="flex flex-col items-center">
+            <button onclick="changeDigit(2, 1)" class="w-10 h-8 rounded-t-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▲</button>
+            <div id="digit-2" class="w-14 h-16 bg-white border-y-2 border-blush-300 font-extrabold text-3xl text-blush-600 flex items-center justify-center shadow-inner">0</div>
+            <button onclick="changeDigit(2, -1)" class="w-10 h-8 rounded-b-lg bg-blush-100 hover:bg-blush-200 text-blush-600 font-bold text-lg active:scale-95">▼</button>
+          </div>
+        </div>
+
+        <div class="text-center space-y-2">
+          <div id="codeFeedback" class="text-xs font-semibold h-4 text-blush-500">Hint: 1 • 4 • 3 (I • Love • You)</div>
+          <button onclick="verifyVaultCode()" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-blush-500 to-blush-600 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition">
+            Unlock Vault 🔓
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= STEP 4: THE GOLDEN KEY & FINALE ================= -->
+      <section id="step4" class="space-y-6 text-center hidden">
+        <div class="text-center">
+          <span class="inline-block px-3 py-1 bg-blush-100 text-blush-600 rounded-full text-xs font-bold uppercase tracking-wider mb-2">Grand Finale</span>
+          <h2 class="text-2xl font-bold font-serif text-slate-800">The Golden Key to My Heart</h2>
+          <p class="text-sm text-slate-500 mt-1">Tap the magic glowing key to open your birthday surprise!</p>
+        </div>
+
+        <!-- Lock & Key Animation Display -->
+        <div class="relative py-4 flex flex-col items-center justify-center">
+          <!-- Big Gift Box Icon -->
+          <div id="giftBox" class="text-7xl md:text-8xl transition-transform duration-700 ease-out cursor-pointer hover:scale-105" onclick="triggerGrandFinale()">
+            🎁
+          </div>
+
+          <!-- Floating Golden Key button -->
+          <div class="mt-4">
+            <button id="finalKeyBtn" onclick="triggerGrandFinale()" 
+                    class="animate-glow inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 via-rose-300 to-blush-400 text-white font-black px-6 py-3.5 rounded-full text-base shadow-xl border-2 border-white hover:scale-105 active:scale-95 transition duration-300">
+              <span class="text-2xl">🗝️</span>
+              <span>Tap to Open with Love</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400 italic">One tap opens a whole year of wishes...</p>
+      </section>
+
+      <!-- ================= GRAND REVEAL MODAL/CARD ================= -->
+      <section id="revealCard" class="hidden space-y-5 text-center transition-all duration-700 animate-fadeIn">
+        <div class="relative">
+          <!-- Sparkles Header -->
+          <div class="text-3xl animate-bounce">🎂✨👑</div>
+          <h2 class="font-script text-4xl md:text-5xl text-blush-600 font-bold mt-2">Happy Birthday, My Love!</h2>
+          <p class="text-xs uppercase font-extrabold tracking-widest text-rosegold mt-1">To the queen of my heart</p>
+        </div>
+
+        <!-- Beautiful Heartfelt Card -->
+        <div class="relative bg-gradient-to-b from-white to-blush-50 rounded-2xl p-6 border-2 border-blush-200 shadow-md text-left space-y-4">
+          <div class="text-4xl text-blush-200 font-serif leading-none select-none">“</div>
+          <p id="wishParagraph" class="text-slate-700 leading-relaxed font-serif text-base md:text-lg italic -mt-4 px-2">
+            Happy Birthday to the most extraordinary woman in the world! You bring warmth, radiant light, and infinite kindness into my life every single day. Walking through life by your side is my sweetest blessing. May every wish you make today blossom into endless joy this year!
+          </p>
+          <div class="text-right font-script text-2xl text-blush-600 font-bold pr-2">
+            Forever & Always Yours ❤️
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <!-- Celebrate More Confetti -->
+          <button onclick="launchJoyConfetti()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blush-500 to-blush-600 text-white font-bold text-sm shadow-md hover:shadow-lg active:scale-95 transition flex items-center gap-1.5">
+            <span>🎉</span> <span>Shower More Confetti!</span>
+          </button>
+
+          <!-- Edit / Personalize Message Button -->
+          <button onclick="editWishMessage()" class="px-4 py-2.5 rounded-xl border border-blush-300 text-blush-600 bg-white hover:bg-blush-50 font-bold text-sm shadow-sm active:scale-95 transition flex items-center gap-1.5">
+            <span>✏️</span> <span>Personalize Wish</span>
+          </button>
+
+          <!-- Play Again -->
+          <button onclick="restartQuest()" class="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 font-bold text-xs transition">
+            🔄 Replay Quest
+          </button>
+        </div>
+      </section>
+
+      <!-- Persistent Mini Encouragement -->
+      <footer class="mt-4 pt-3 border-t border-blush-100/60 text-center flex items-center justify-between text-[11px] text-slate-400">
+        <span>Handcrafted with love 💕</span>
+        <span id="stepCounterText">Step 1 of 4</span>
+      </footer>
+
+    </div>
+  </main>
+
+  <footer class="relative z-10 text-center py-4 text-xs text-slate-400 font-medium">
+    Made just for you on your special day ✨
+  </footer>
+
+  <!-- Web Audio API Synthesis Script (Self-contained, gentle chimes) -->
+  <script>
+    // Audio Context Setup
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundLabel = document.getElementById('soundLabel');
+      if (soundEnabled) {
+        soundIcon.innerText = '🔔';
+        soundLabel.innerText = 'Music: ON';
+        playGentleChime(523.25); // C5
+      } else {
+        soundIcon.innerText = '🔕';
+        soundLabel.innerText = 'Music: OFF';
+      }
+    }
+
+    // Gentle tone player using pure Web Audio oscillator synthesis
+    function playChime(freq = 440, type = 'sine', duration = 0.4) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch(e) {
+        // Audio might be blocked before first user click
+      }
+    }
+
+    // Success harmony chord
+    function playSweetSuccess() {
+      if (!soundEnabled) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C - E - G - C
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playChime(freq, 'sine', 0.5), idx * 120);
+      });
+    }
+
+    // Fanfare chimes for the finale
+    function playBirthdayChimes() {
+      if (!soundEnabled) return;
+      const melody = [
+        {f: 523.25, d: 250}, {f: 523.25, d: 250}, {f: 587.33, d: 500}, 
+        {f: 523.25, d: 500}, {f: 698.46, d: 500}, {f: 659.25, d: 800}
+      ];
+      melody.forEach((note, i) => {
+        setTimeout(() => playChime(note.f, 'triangle', 0.6), i * 350);
+      });
+    }
+
+    function playGentleChime(freq) {
+      playChime(freq, 'sine', 0.3);
+    }
+  </script>
+
+  <!-- Game Logic & Interaction Script -->
+  <script>
+    let currentStep = 1;
+
+    // -------------------------------------------------------------
+    // Floating Hearts Background Generation
+    // -------------------------------------------------------------
+    function createBackgroundParticles() {
+      const container = document.getElementById('heartsContainer');
+      const symbols = ['💖', '🌸', '✨', '💕', '🌷', '🤍'];
+      const totalCount = 18;
+
+      for (let i = 0; i < totalCount; i++) {
+        const el = document.createElement('div');
+        el.className = 'heart-bubble text-lg md:text-xl';
+        el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+        el.style.left = `${Math.random() * 95}%`;
+        el.style.animationDelay = `${Math.random() * 12}s`;
+        el.style.animationDuration = `${10 + Math.random() * 10}s`;
+        container.appendChild(el);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Stepper Navigation Management
+    // -------------------------------------------------------------
+    function setStep(stepNum) {
+      currentStep = stepNum;
+
+      // Hide all panels
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step3').classList.add('hidden');
+      document.getElementById('step4').classList.add('hidden');
+      document.getElementById('revealCard').classList.add('hidden');
+
+      // Update progress bar length
+      const progressBar = document.getElementById('progressBar');
+      const progressPercent = ((stepNum - 1) / 3) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update node styles
+      for (let i = 1; i <= 4; i++) {
+        const node = document.getElementById(`node-${i}`);
+        if (i < stepNum) {
+          node.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-blush-500 text-white shadow-md transition-all duration-300";
+          node.innerHTML = "✓";
+        } else if (i === stepNum) {
+          node.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-blush-500 text-white ring-4 ring-blush-200 shadow-lg scale-110 transition-all duration-300";
+          node.innerHTML = `${i}`;
+        } else {
+          node.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-white text-slate-400 border border-blush-100 shadow-sm transition-all duration-300";
+          node.innerHTML = `${i}`;
+        }
+      }
+
+      // Display active step
+      const stepCounterText = document.getElementById('stepCounterText');
+      if (stepNum <= 4) {
+        document.getElementById(`step${stepNum}`).classList.remove('hidden');
+        stepCounterText.innerText = `Step ${stepNum} of 4`;
+      }
+
+      playGentleChime(440 + stepNum * 50);
+    }
+
+    function goToStep(num) {
+      // Allow moving backward anytime, forward only if already solved
+      if (num < currentStep) {
+        setStep(num);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // STEP 1: Word Scramble Logic
+    // -------------------------------------------------------------
+    const targetWord = "SUNSHINE";
+
+    function checkWordAnswer() {
+      const input = document.getElementById('wordInput');
+      const val = input.value.trim().toUpperCase();
+      const feedback = document.getElementById('wordFeedback');
+
+      if (val === targetWord) {
+        feedback.innerText = "✨ Perfect! You brighten all my days!";
+        feedback.className = "text-center text-sm font-bold text-emerald-500";
+        playSweetSuccess();
+        setTimeout(() => {
+          setStep(2);
+          initMemoryGame();
+        }, 800);
+      } else {
+        feedback.innerText = "Cute guess! Try again sweetie ☀️";
+        feedback.className = "text-center text-sm font-semibold text-rose-500 animate-pulse";
+        playGentleChime(260);
+      }
+    }
+
+    function revealWordHint() {
+      document.getElementById('hintText').classList.remove('hidden');
+      playGentleChime(400);
+    }
+
+    // -------------------------------------------------------------
+    // STEP 2: Memory Match Game (6 cards, 3 pairs)
+    // -------------------------------------------------------------
+    const icons = ['💍', '🎁', '💖'];
+    let memoryDeck = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let lockBoard = false;
+
+    function initMemoryGame() {
+      const grid = document.getElementById('memoryGrid');
+      grid.innerHTML = '';
+      memoryDeck = [...icons, ...icons].sort(() => 0.5 - Math.random());
+      flippedCards = [];
+      matchedPairs = 0;
+      lockBoard = false;
+      document.getElementById('memoryStatus').innerText = "Matches: 0 / 3";
+
+      memoryDeck.forEach((icon, index) => {
+        const card = document.createElement('div');
+        card.className = "perspective-1000 h-24 cursor-pointer";
+        card.innerHTML = `
+          <div class="card-inner preserve-3d w-full h-full relative rounded-2xl shadow-sm border border-blush-200" data-icon="${icon}" data-index="${index}">
+            <!-- Front (Card Face Down) -->
+            <div class="backface-hidden absolute inset-0 bg-gradient-to-br from-blush-100 to-blush-50 rounded-2xl flex items-center justify-center font-bold text-2xl text-blush-400 select-none">
+              💌
+            </div>
+            <!-- Back (Card Face Up) -->
+            <div class="backface-hidden rotate-y-180 absolute inset-0 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-inner select-none border-2 border-blush-300">
+              ${icon}
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => handleCardClick(card.querySelector('.card-inner')));
+        grid.appendChild(card);
+      });
+    }
+
+    function handleCardClick(cardInner) {
+      if (lockBoard) return;
+      if (cardInner.classList.contains('rotate-y-180')) return;
+
+      cardInner.classList.add('rotate-y-180');
+      flippedCards.push(cardInner);
+      playGentleChime(500);
+
+      if (flippedCards.length === 2) {
+        checkMemoryMatch();
+      }
+    }
+
+    function checkMemoryMatch() {
+      lockBoard = true;
+      const [c1, c2] = flippedCards;
+      const icon1 = c1.getAttribute('data-icon');
+      const icon2 = c2.getAttribute('data-icon');
+
+      if (icon1 === icon2) {
+        matchedPairs++;
+        document.getElementById('memoryStatus').innerText = `Matches: ${matchedPairs} / 3 ✨`;
+        playGentleChime(660);
+        flippedCards = [];
+        lockBoard = false;
+
+        if (matchedPairs === 3) {
+          playSweetSuccess();
+          document.getElementById('memoryStatus').innerText = "You found them all, darling! 💕";
+          setTimeout(() => {
+            setStep(3);
+          }, 1000);
+        }
+      } else {
+        setTimeout(() => {
+          c1.classList.remove('rotate-y-180');
+          c2.classList.remove('rotate-y-180');
+          flippedCards = [];
+          lockBoard = false;
+        }, 900);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // STEP 3: Safe Combination Lock (Code: 1 - 4 - 3)
+    // -------------------------------------------------------------
+    const secretCode = [1, 4, 3];
+    let currentDigits = [0, 0, 0];
+
+    function changeDigit(index, delta) {
+      currentDigits[index] = (currentDigits[index] + delta + 10) % 10;
+      document.getElementById(`digit-${index}`).innerText = currentDigits[index];
+      playGentleChime(400 + currentDigits[index] * 20);
+    }
+
+    function verifyVaultCode() {
+      const feedback = document.getElementById('codeFeedback');
+      const isCorrect = currentDigits.every((val, i) => val === secretCode[i]);
+
+      if (isCorrect) {
+        feedback.innerText = "🔓 Access Granted: 1 4 3 = I Love You!";
+        feedback.className = "text-xs font-bold text-emerald-500";
+        playSweetSuccess();
+        setTimeout(() => {
+          setStep(4);
+        }, 800);
+      } else {
+        feedback.innerText = "Not quite! Remember: 1 (Heart) - 4 (Love) - 3 (Words)";
+        feedback.className = "text-xs font-bold text-rose-500 animate-pulse";
+        playGentleChime(250);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // STEP 4: Grand Finale Reveal & Confetti
+    // -------------------------------------------------------------
+    function triggerGrandFinale() {
+      // Audio Chime
+      playBirthdayChimes();
+
+      // Confetti burst
+      launchJoyConfetti();
+
+      // Show finale card
+      document.getElementById('step4').classList.add('hidden');
+      const reveal = document.getElementById('revealCard');
+      reveal.classList.remove('hidden');
+
+      // Update Node 4
+      const node4 = document.getElementById('node-4');
+      node4.className = "w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm bg-blush-500 text-white shadow-lg";
+      node4.innerHTML = "👑";
+
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('stepCounterText').innerText = "All completed with love! 💖";
+    }
+
+    function launchJoyConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#ef446a', '#fbaab3', '#ffd166', '#ff9bb2', '#ffffff']
+        });
+
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#ef446a', '#fbaab3', '#ffd166']
+          });
+          confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#ef446a', '#fbaab3', '#ffd166']
+          });
+        }, 300);
+      }
+    }
+
+    // Editable message function without prompt/alert
+    function editWishMessage() {
+      const p = document.getElementById('wishParagraph');
+      const current = p.innerText;
+      
+      // Inline editable mode
+      if (!p.isContentEditable) {
+        p.contentEditable = "true";
+        p.focus();
+        p.classList.add('ring-2', 'ring-blush-400', 'bg-white', 'p-2', 'rounded-lg');
+        
+        // Show subtle notification banner
+        const notif = document.createElement('div');
+        notif.id = "editNotif";
+        notif.innerText = "You can now edit your message directly! Tap outside to save.";
+        notif.className = "text-[11px] font-bold text-blush-600 bg-blush-100 py-1 px-3 rounded-full inline-block mt-2";
+        p.parentNode.appendChild(notif);
+
+        p.onblur = () => {
+          p.contentEditable = "false";
+          p.classList.remove('ring-2', 'ring-blush-400', 'bg-white', 'p-2', 'rounded-lg');
+          const oldNotif = document.getElementById('editNotif');
+          if (oldNotif) oldNotif.remove();
+        };
+      }
+    }
+
+    function restartQuest() {
+      currentDigits = [0, 0, 0];
+      for (let i = 0; i < 3; i++) {
+        document.getElementById(`digit-${i}`).innerText = '0';
+      }
+      document.getElementById('wordInput').value = '';
+      document.getElementById('wordFeedback').innerText = '';
+      document.getElementById('hintText').classList.add('hidden');
+      setStep(1);
+    }
+
+    // Window load initialization
+    window.onload = function() {
+      createBackgroundParticles();
+      setStep(1);
+    };
+  </script>
+</body>
+</html>
